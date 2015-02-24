@@ -69,7 +69,105 @@ ln_back_prop_fn = function()
 
 # 2. Back-propagation learning - 1 layer
 # ----------------------------
-ln_back_prop_fn2 = function()
+
+one_layer_net_calc = function(b, w, x, n_cnt)
+{
+  s = rep(0, n_cnt);
+  
+  for (i in seq(1, n_cnt)) {
+    s[i] = b[i] + w[2,i, ] %*% x;
+  }
+  
+  y = act_sigmoid_fn(s);
+  
+  return (y);
+}
+
+one_layer_net_learn = function(w, y, d, x, n_cnt)
+{
+  # Learning...  
+  a = 0.001;
+  nu = 0.3;    
+  # adjust weights if needed
+  # nu is learning rate 0.1..0.9
+  
+  n_err = nu * (d - y); 
+  
+  for (i in seq(1, n_cnt)) {
+    w[3,i,] = w[2,i,] + a * w[1,i,] + n_err[i] * x;
+  }
+  
+  w[1,,] = w[2,,];
+  w[2,,] = w[3,,];
+  
+  return (w);
+}
+
+one_layer_net = function()
+{
+  ret = ex_data_x4d3();
+  ex_x = ret[[1]]; ex_d = ret[[2]];
+  rm(ret);
+  
+  # inputs
+  i_cnt = 4;
+  # neurons in the layer
+  n_cnt = 3;  
+
+  b = rep(0, n_cnt);
+  # desired output, for learning
+  d = rep(0, n_cnt);
+  
+  # weights to remember
+  w_mem_step = 3;
+  
+  # initialize weights
+  w = array(0, dim = c(w_mem_step, n_cnt, i_cnt));
+  
+  
+  # run auto training
+  i = 0;
+  while (i < 500) {
+    
+    id = (i %% n_cnt) + 1;
+    x = ex_x[id,];
+    d = ex_d[id,];
+
+    y = one_layer_net_calc(b, w, x, n_cnt);    
+    w = one_layer_net_learn(w, y, d, x, n_cnt);
+    
+    i = i + 1;
+  }
+  
+  plot_weights(w[3,,]);
+
+  # test run
+  xv = ex_input_x4();
+  print("num of examples: ");print(length(xv[,1]));
+  
+  for (i in seq(1, length(xv[,1]))) {
+    x = xv[i,];
+    y = one_layer_net_calc(b, w, x, n_cnt);
+    print(" "); print("----");
+    print("   |-->inputs:"); print(xv[i,]);
+    print("   |-->outputs:"); print(y);
+  }
+  
+}
+
+ex_input_x4 = function()
+{
+  ex_x = array(0, dim = c(5,4));
+  ex_x[1,1] = 0; ex_x[1,2] = 1; ex_x[1,3] = 1; ex_x[1,4] = 0;
+  ex_x[2,1] = 1; ex_x[2,2] = 0; ex_x[2,3] = 0; ex_x[2,4] = 1;
+  ex_x[3,1] = 1; ex_x[3,2] = 1; ex_x[3,3] = 0; ex_x[3,4] = 1;
+  ex_x[4,1] = 1; ex_x[4,2] = 1; ex_x[4,3] = 1; ex_x[4,4] = 1;
+  ex_x[5,1] = 0; ex_x[5,2] = 1; ex_x[5,3] = 1; ex_x[5,4] = 1;
+  
+  return (ex_x);
+}
+
+ex_data_x4d3 = function()
 {
   ex_x = array(0, dim = c(3,4));
   ex_d = array(0, dim = c(3,3));  
@@ -86,83 +184,37 @@ ln_back_prop_fn2 = function()
   ex_x[3,1] = 1; ex_x[3,2] = 1; ex_x[3,3] = 0; ex_x[3,4] = 1;
   ex_d[3,1] = 0; ex_d[3,2] = 0; ex_d[3,3] = 1;
   
-  x = ex_x[1,];
-  
-  i_cnt = length(x);
-  print("x = "); print(x);
-  
-  n_cnt = c(3);
-  
-  d = ex_d[1,];
+  return (list(ex_x, ex_d));
+}
 
-  s = rep(0, n_cnt);
-  
-  b = rep(0, n_cnt); print("b = "); print(b);
-  
-  mem_step = 3;
-  
-  w = array(1, dim = c(mem_step, n_cnt, i_cnt));
-  
-  print("w[3,] = "); print(w[3,,]);
-  
-  learn = 1;
-  steps = 1;
-  while (1) {
-    steps = steps + 1;
-    
-    for (i in seq(1, n_cnt)) {
-      s[i] = b[i] + w[2,i, ] %*% x;
-    }
-  
-    y = act_sigmoid_fn(s);
-            
-    if (steps %% 3 == 0) {
-      print("----------------");
-      print("x = "); print(x);
-      print("y = "); print(y);
-
-      res = readline('Continue or run example (y, n, num(1..3), p(plot weights))?');
-      learn = 1;
-      if (res == "n") {
-        break;
-      } else if (res == "1") {
-        x = ex_x[1,];
-        d = ex_d[1,];
-      } else if (res == "2") {
-        x = ex_x[2,];
-        d = ex_d[2,];
-      } else if (res == "3") {
-        x = ex_x[3,];
-        d = ex_d[3,];
-      } else if (res == "p") {
-        plot_weights(w[3,,]);
-      } else {
-        learn = 0;
-        x = c(1, 1, 1, 1);
-      }
-    }
-
-    if (!learn)
-      next;
-    # Learning...
-    # adjust weights if needed
-    n_err = (d - y); 
-    #print("n_err = "); print(n_err);
-
-    a = 0.01;
-    nu = 0.45;
-
-    for (i in seq(1, n_cnt)) {
-      w[3,i,] = w[2,i,] + a * w[1,i,] + (nu * n_err[i]) * x;
-    }
-
-    w[1,,] = w[2,,];
-    w[2,,] = w[3,,];
-
-    # new weights
-    print("w[3,i] = "); print(w[3,,]);
-  }
-
+check_point = function()
+{        
+#   if (steps %% 3 != 0)
+#     return;
+#   
+#   print("----------------");
+#   print("x = "); print(x);
+#   print("y = "); print(y);
+# 
+#   res = readline('Continue or run example (y, n, num(1..3), p(plot weights))?');
+#   learn = 1;
+#   if (res == "n") {
+#     return;
+#   } else if (res == "1") {
+#     x = ex_x[1,];
+#     d = ex_d[1,];
+#   } else if (res == "2") {
+#     x = ex_x[2,];
+#     d = ex_d[2,];
+#   } else if (res == "3") {
+#     x = ex_x[3,];
+#     d = ex_d[3,];
+#   } else if (res == "p") {
+#     plot_weights(w[3,,]);
+#   } else {
+#     learn = 0;
+#     x = c(1, 1, 1, 1);
+#   }
 }
 
 plot_weights = function(w)
@@ -230,14 +282,14 @@ plot_xy2 = function(x, min_x, max_x, x_str, y, y_str)
     step = abs(max(y) - min(y)) / (l - 1);
     step_x = abs(max_x - min_x) / (l - 1);
   }
-  print(min(y));print(max(y));
+  
   plot(seq(min_x, max_x, step_x), seq(min(y), max(y), step),
     type ='n', ylab=y_str);
   grid(lwd = 1, col = col_grid);
 
   #-------------------------------------------------
   for (i in seq(1, length(y[,1]))) {
-     points(x, y[i,], type="p", col = cols[i]);
+     points(x, y[i,], type="p", pch = 21, bg = cols[i], cex = 1.5);
   }
 
   par(op); # - reset to default
