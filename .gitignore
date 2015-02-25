@@ -29,3 +29,4 @@
 *.hex
 
 .Rhistory
+.RData

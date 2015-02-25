@@ -172,7 +172,7 @@ ex_input_x4 = function()
 alg_matrix_to_spiral = function(x, m, rs = 0, re = 0, cs = 0, ce = 0, id = 1,
                                         rev = 0, row = 0)
 {
-  if (rs >= re && cs >= ce) {
+  if (rs > re && cs > ce) {
     return (x);
   }
 
@@ -181,6 +181,9 @@ alg_matrix_to_spiral = function(x, m, rs = 0, re = 0, cs = 0, ce = 0, id = 1,
       for (i in seq(cs, ce)) {
         x[id] = m[rs,i];
         id = id + 1;
+      }
+      if (id > length(x)) {
+        return (x);
       }
     }
     rs = rs + 1;
@@ -194,6 +197,9 @@ alg_matrix_to_spiral = function(x, m, rs = 0, re = 0, cs = 0, ce = 0, id = 1,
           x[id] = m[i,ce];
           id = id + 1;
         }
+        if (id > length(x)) {
+          return (x);
+        }
     }
     ce = ce - 1;
     row = 0;
@@ -206,6 +212,9 @@ alg_matrix_to_spiral = function(x, m, rs = 0, re = 0, cs = 0, ce = 0, id = 1,
           x[id] = m[re,i];
           id = id + 1;
         }
+        if (id > length(x)) {
+          return (x);
+        }
     }
     re = re - 1;
     row = 1;
@@ -217,6 +226,9 @@ alg_matrix_to_spiral = function(x, m, rs = 0, re = 0, cs = 0, ce = 0, id = 1,
         for (i in seq(re, rs)) {
           x[id] = m[i,cs];
           id = id + 1;
+        }
+        if (id > length(x)) {
+          return (x);
         }
     }
     cs = cs + 1;
