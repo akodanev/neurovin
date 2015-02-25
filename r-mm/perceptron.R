@@ -87,11 +87,23 @@ one_layer_net_learn = function(w, y, d, x, n_cnt)
 {
   # Learning...  
   a = 0.001;
-  nu = 0.8;    
+  lr = 1;
   # adjust weights if needed
-  # nu is learning rate 0.1..0.9
+  # lr is learning rate 0.1..0.9
 
-  n_err = nu * (d - y);
+  # delta rule, h is the weighted sum of the neuron's inputs
+  h = rep(0, n_cnt);
+  b = rep(0, n_cnt);
+# for (i in seq(1, n_cnt)) {
+#    h[i] = b[i] + w[2,i, ] %*% x;
+#  }
+
+  f_deriv = 1; # act_sigmoid_deriv_fn(h);
+  n_err = (d - y) * f_deriv;
+  #print("---");
+  #print(h);
+  #print(d - y);
+  #print(n_err);
 
   for (i in seq(1, n_cnt)) {
     w[3,i,] = w[2,i,] + a * w[1,i,] + n_err[i] * x;
@@ -106,6 +118,7 @@ one_layer_net_learn = function(w, y, d, x, n_cnt)
 one_layer_net = function()
 {
   ret = ex_data_pic16x16_for_learn();
+  #ret = ex_data_x4d3();
   ex_x = ret[[1]]; ex_d = ret[[2]];
   rm(ret);
 
@@ -128,7 +141,7 @@ one_layer_net = function()
 
   # run auto training
   i = 0;
-  while (i < 20) {
+  while (i < 500) {
 
     id = (i %% n_cnt) + 1;
     x = ex_x[id,];
@@ -144,6 +157,7 @@ one_layer_net = function()
 
   # test run
   xv = ex_data_pic16x16_for_test();
+  #xv = ex_data_x4();
   print("num of examples: ");print(length(xv[,1]));
 
   for (i in seq(1, length(xv[,1]))) {
@@ -157,7 +171,7 @@ one_layer_net = function()
 
 }
 
-ex_input_x4 = function()
+ex_data_x4 = function()
 {
   ex_x = array(0, dim = c(5,4));
   ex_x[1,1] = 0; ex_x[1,2] = 1; ex_x[1,3] = 1; ex_x[1,4] = 0;
@@ -245,7 +259,7 @@ ex_data_pic16x16_for_learn = function()
 {
   library(png);
 
-  tmp_x = array(0, dim = c(16,16));
+  #tmp_x = array(0, dim = c(16,16));
 
   ex_x = array(0, dim = c(3,256));
   ex_d = array(0, dim = c(3,3));
@@ -254,11 +268,11 @@ ex_data_pic16x16_for_learn = function()
 
   for (i in seq(1, 3)) {
     img = readPNG(id[i]);
-    tmp_x = as.vector(t(img[,,4]));
-    len2 = length(tmp_x) / 2;
-    for (k in seq(1, len2)) {
-      ex_x[i,k] = tmp_x[len2 - k]
-    }
+    #tmp_x = as.vector(t(img[,,4]));
+    #len2 = length(tmp_x) / 2;
+    #for (k in seq(1, len2)) {
+    #  ex_x[i,k] = tmp_x[len2 - k]
+    #}
     ex_x[i,] = as.vector(t(img[,,4]));
   }
 
