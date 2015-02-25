@@ -73,13 +73,13 @@ ln_back_prop_fn = function()
 one_layer_net_calc = function(b, w, x, n_cnt)
 {
   s = rep(0, n_cnt);
-  
+
   for (i in seq(1, n_cnt)) {
     s[i] = b[i] + w[2,i, ] %*% x;
   }
-  
+
   y = act_sigmoid_fn(s);
-  
+
   return (y);
 }
 
@@ -87,72 +87,74 @@ one_layer_net_learn = function(w, y, d, x, n_cnt)
 {
   # Learning...  
   a = 0.001;
-  nu = 0.3;    
+  nu = 0.8;    
   # adjust weights if needed
   # nu is learning rate 0.1..0.9
-  
-  n_err = nu * (d - y); 
-  
+
+  n_err = nu * (d - y);
+
   for (i in seq(1, n_cnt)) {
     w[3,i,] = w[2,i,] + a * w[1,i,] + n_err[i] * x;
   }
-  
+
   w[1,,] = w[2,,];
   w[2,,] = w[3,,];
-  
+
   return (w);
 }
 
 one_layer_net = function()
 {
-  ret = ex_data_x4d3();
+  ret = ex_data_pic16x16_for_learn();
   ex_x = ret[[1]]; ex_d = ret[[2]];
   rm(ret);
-  
+
   # inputs
-  i_cnt = 4;
+  i_cnt = length(ex_x[1,]);
+  print("inputs number is:"); print(i_cnt);
   # neurons in the layer
-  n_cnt = 3;  
+  n_cnt = 3;
 
   b = rep(0, n_cnt);
   # desired output, for learning
   d = rep(0, n_cnt);
-  
+
   # weights to remember
   w_mem_step = 3;
-  
+
   # initialize weights
   w = array(0, dim = c(w_mem_step, n_cnt, i_cnt));
-  
-  
+
+
   # run auto training
   i = 0;
-  while (i < 500) {
-    
+  while (i < 20) {
+
     id = (i %% n_cnt) + 1;
     x = ex_x[id,];
     d = ex_d[id,];
 
-    y = one_layer_net_calc(b, w, x, n_cnt);    
+    y = one_layer_net_calc(b, w, x, n_cnt);
     w = one_layer_net_learn(w, y, d, x, n_cnt);
-    
+
     i = i + 1;
   }
-  
+
   plot_weights(w[3,,]);
 
   # test run
-  xv = ex_input_x4();
+  xv = ex_data_pic16x16_for_test();
   print("num of examples: ");print(length(xv[,1]));
-  
+
   for (i in seq(1, length(xv[,1]))) {
     x = xv[i,];
     y = one_layer_net_calc(b, w, x, n_cnt);
-    print(" "); print("----");
-    print("   |-->inputs:"); print(xv[i,]);
-    print("   |-->outputs:"); print(y);
+
+    print(" "); print("----");print(i)
+    # print("   |-->inputs:"); print(xv[i,]);
+    print("   |-->outputs:"); print(round(y, 5));
   }
-  
+
 }
 
 ex_input_x4 = function()
@@ -166,6 +168,111 @@ ex_input_x4 = function()
   
   return (ex_x);
 }
+
+alg_matrix_to_spiral = function(x, m, rs = 0, re = 0, cs = 0, ce = 0, id = 1,
+                                        rev = 0, row = 0)
+{
+  if (rs >= re && cs >= ce) {
+    return (x);
+  }
+
+  if (row == 0) {
+    if (rev == 0) {
+      for (i in seq(cs, ce)) {
+        x[id] = m[rs,i];
+        id = id + 1;
+      }
+    }
+    rs = rs + 1;
+    row = 1;
+    rev = 0;
+  }
+
+  if (row == 1) {
+    if (rev == 0) {
+        for (i in seq(rs, re)) {
+          x[id] = m[i,ce];
+          id = id + 1;
+        }
+    }
+    ce = ce - 1;
+    row = 0;
+    rev = 1;
+  }
+
+  if (row == 0) {
+    if (rev == 1) {
+        for (i in seq(ce, cs)) {
+          x[id] = m[re,i];
+          id = id + 1;
+        }
+    }
+    re = re - 1;
+    row = 1;
+    rev = 1;
+  }
+
+  if (row == 1) {
+    if (rev == 1) {
+        for (i in seq(re, rs)) {
+          x[id] = m[i,cs];
+          id = id + 1;
+        }
+    }
+    cs = cs + 1;
+    row = 0;
+    rev = 0;
+  }
+
+  x = alg_matrix_to_spiral(x, m, rs, re, cs, ce, id, rev, row);
+
+  return (x);
+}
+
+ex_data_pic16x16_for_learn = function()
+{
+  library(png);
+
+  tmp_x = array(0, dim = c(16,16));
+
+  ex_x = array(0, dim = c(3,256));
+  ex_d = array(0, dim = c(3,3));
+
+  id = c("img16x16/A.png", "img16x16/B.png", "img16x16/C.png");
+
+  for (i in seq(1, 3)) {
+    img = readPNG(id[i]);
+    tmp_x = as.vector(t(img[,,4]));
+    len2 = length(tmp_x) / 2;
+    for (k in seq(1, len2)) {
+      ex_x[i,k] = tmp_x[len2 - k]
+    }
+    ex_x[i,] = as.vector(t(img[,,4]));
+  }
+
+  ex_d[1,1] = 1; ex_d[1,2] = 0; ex_d[1,3] = 0; # A
+  ex_d[2,1] = 0; ex_d[2,2] = 1; ex_d[2,3] = 0; # B
+  ex_d[3,1] = 0; ex_d[3,2] = 0; ex_d[3,3] = 1; # C
+
+  return (list(ex_x, ex_d));
+}
+
+ex_data_pic16x16_for_test = function(i = 0)
+{
+  library(png);
+  ex_x = array(0, dim = c(5,256));
+
+  id = c("img16x16/A0.png", "img16x16/B0.png", "img16x16/C0.png", "img16x16/D0.png",
+         "img16x16/E0.png");
+
+  for (i in seq(1, 5)) {
+    img = readPNG(id[i]);
+    ex_x[i,] = as.vector(t(img[,,4]))
+  }
+
+  return (ex_x);
+}
+
 
 ex_data_x4d3 = function()
 {
