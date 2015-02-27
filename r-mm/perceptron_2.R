@@ -9,55 +9,54 @@ source("plot_data.R");
 
 source("ex_data_img16x16.R");
 
-hy = 0;
-hs = 0;
-s = 0;
-w = 0;
-wh = 0;
-b = 0;
-bh = 0;
-x = 0; hy = 0; y = 0;
-
-multi_net_calc = function(h_cnt, n_cnt, k)
+multi_net_calc = function(x, i_cnt, hs, hy, wh, bh, h_cnt, s, w, b, y, n_cnt, k)
 {
-  hs = rep(0, h_cnt);
   for (i in seq(1, h_cnt)) {
-    hs[i] = bh[i] + wh[2,i, ] %*% x;
+    hs[i] = bh[i] + wh[i,] %*% x;    
   }
-
+  
   hy = act_sigmoid_fn(hs, k);
-
-  s = rep(0, n_cnt);
+  
   for (i in seq(1, n_cnt)) {
-    s[i] = b[i] + w[2,i, ] %*% hy;
-  }
+    s[i] = b[i] + w[i,] %*% hy;
+  }    
 
   y = act_sigmoid_fn(s, k);
+  
+  return(list(hs, hy, s, y));
 }
 
-multi_net_learn = function(d, h_cnt, n_cnt)
+multi_net_learn = function(x, i_cnt, hs, wh, bh, hy, h_cnt, s, w, b, y, t, n_cnt, k)
 {
-  # Learning...
-  # learning rate 0.1..0.9
-  lr = 1;
-
-  do = lr * act_sigmoid_deriv_fn(s, k) * (d - y);
-
-  dh = act_sigmoid_deriv_fn(hs, k) * (do %*% w[2,i,]);
-
+  
+  # update weights in the output layer
+  d = act_sigmoid_deriv_y_fn(y, k) * (t - y);
+  
   for (i in seq(1, n_cnt)) {
-    w[2,i,] = w[2,i,] + do[i] * y;
+    w[i,] = w[i,] + d[i] * hy;    
   }
-
+  b = b + d;
+  
+  # update weights in the hidden layer
+  ds = rep(0, h_cnt);
   for (i in seq(1, h_cnt)) {
-    wh[2,i,] = wh[2,i,] + dh[i] * x;
+    ds[i] = d %*% w[,i];
   }
+  
+  dh = act_sigmoid_deriv_y_fn(hy, k) * ds;
+  
+  for (i in seq(1, h_cnt)) {
+    wh[i,] = wh[i,] + dh[i] * x;      
+  }
+  bh = bh + dh;
+ 
+  return(list(wh, bh, w, b));
 }
 
 multi_net = function()
 {
   ret = ex_data_for_learn();
-  ex_x = ret[[1]]; ex_d = ret[[2]];
+  ex_x = ret[[1]]; ex_t = ret[[2]];
   rm(ret);
 
   # inputs
@@ -68,38 +67,44 @@ multi_net = function()
   cat("hidden layer contains", h_cnt, "neurons\n");
 
   # neurons in the output layer
-  n_cnt = length(ex_d[1,]);
+  n_cnt = length(ex_t[1,]);
 
-  fn_k = 1;
+  # k for activation functions
+  k = 1;
 
-  bh = seq(1, h_cnt);
-  b = seq(1, n_cnt);
-
-  # desired output, for learning
+  # hidden layer
+  wh = array(0, dim = c(h_cnt, i_cnt));
+  bh = rep(0, h_cnt);
+  hs = rep(0, h_cnt);
+  hy = rep(0, h_cnt);
+  
+  # output layer
+  w  = array(0, dim = c(n_cnt, h_cnt));
+  b = rep(0, n_cnt);
+  s = rep(0, n_cnt);
+  y = rep(0, n_cnt);
+  
   d = rep(0, n_cnt);
 
-  # weights to remember
-  w_mem_step = 3;
+  print("run auto training...");
 
-  # initialize weights (x and h)
-  wh = array(0, dim = c(w_mem_step, h_cnt, i_cnt));
-  w = array(0, dim = c(w_mem_step, n_cnt, h_cnt));
-
-  # run auto training
   i = 0;
-  while (i < 20) {
+  while (i < 10) {
 
     id = (i %% n_cnt) + 1;
     x = ex_x[id,];
-    d = ex_d[id,];
+    t = ex_t[id,];
 
-    multi_net_calc(h_cnt, n_cnt, fn_k);
-    multi_net_learn(d, h_cnt, n_cnt);
+    ret = multi_net_calc(x, i_cnt, hs, hy, wh, bh, h_cnt, s, w, b, y, n_cnt, k);
+    hs = ret[[1]]; hy = ret[[2]]; s = ret[[3]]; y = ret[[4]];
+
+    ret = multi_net_learn(x, i_cnt, hs, wh, bh, hy, h_cnt, s, w, b, y, t, n_cnt, k);
+    wh = ret[[1]]; bh = ret[[2]]; w = ret[[3]]; b = ret[[4]];
 
     i = i + 1;
   }
-
-  plot_weights(w[2,,]);
+  
+  plot_weights(w);
 
   # test run
   for (i in seq(1, 5)) {
@@ -108,7 +113,8 @@ multi_net = function()
 
     x = ex_data_for_test(i);
 
-    multi_net_calc(h_cnt, n_cnt, fn_k);
+    ret = multi_net_calc(x, i_cnt, hs, hy, wh, bh, h_cnt, s, w, b, y, n_cnt, k);
+    hs = ret[[1]]; hy = ret[[2]]; s = ret[[3]]; y = ret[[4]];
 
     ex_analyze_results(y);
   }

@@ -15,6 +15,10 @@ act_sigmoid_deriv_fn = function(x, k = 1)
   y = act_sigmoid_fn(x, k);
   return (k * y * (1 - y));
 }
+act_sigmoid_deriv_y_fn = function(y, k = 1)
+{
+  return (k * y * (1 - y));
+}
 
 # 2. bipolar sigmoid function, y in (-1..1) range
 # -----------------------------------------------
@@ -25,6 +29,10 @@ act_bsigmoid_fn = function(x, k = 1)
 act_bsigmoid_deriv_fn = function(x, k = 1)
 {
   y = act_bsigmoid_fn(x, k);
+  return (k * (1 - y * y) / 2);
+}
+act_bsigmoid_deriv_y_fn = function(y, k = 1)
+{
   return (k * (1 - y * y) / 2);
 }
 
