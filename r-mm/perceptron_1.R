@@ -26,15 +26,15 @@ single_net_calc = function(b, w, x, n_cnt, k)
 single_net_learn = function(b, w, y, d, x, n_cnt)
 {
   # Learning...
-  
+
   # learning rate 0.1..0.9
   lr = 1;
-  
+
   # delta rule, h is the weighted sum of the neuron's inputs
   # h = rep(0, n_cnt);
-  
+
   n_err = lr * (d - y);
-  
+
   for (i in seq(1, n_cnt)) {
     w[2,i,] = w[2,i,] + n_err[i] * x;
   }
@@ -82,7 +82,7 @@ single_net = function()
   plot_weights(w[2,,]);
 
   # test run
-  for (i in seq(1, 5)) {
+  for (i in seq(1, 6)) {
 
     cat("\nTest #", i, ": ");
 

@@ -1,9 +1,18 @@
 # Copyright (c) 2015 Alexey Kodanev <akodanev@gmail.com>
 # All Rights Reserved.
 
+# file name convention:
+# ex_alp[id].png - files for training/learning;
+# ex_alp[id]#.png - files for testing the algorithms;
+
+# outputs connected to the following object
+ex_alp = c('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+           'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z');
+
+ex_alp_len = 6; # length(ex_alp);
+
 ex_analyze_results = function(y)
 {
-  alp = c('A', 'B', 'C');
   id = -1;
   uncertanty = -1;
 
@@ -15,7 +24,7 @@ ex_analyze_results = function(y)
   }
 
   if (id >= 0 && uncertanty == 0) {
-      cat(">OK, I know it, this is letter", alp[id], "\n");
+      cat(">OK, I know it, this is letter", ex_alp[id], "\n");
       return (0);
   }
 
@@ -27,40 +36,34 @@ ex_data_for_learn = function()
   library(png);
 
   xv = rep(0, 256);
-  ex_x = array(0, dim = c(3,256));
-  ex_d = array(0, dim = c(3,3));
+  ex_x = array(0, dim = c(ex_alp_len,256));
+  ex_d = diag(1, ex_alp_len);
 
-  id = c("img16x16/A.png", "img16x16/B.png", "img16x16/C.png");
-
-  for (i in seq(1, 3)) {
-    img = readPNG(id[i]);
-    #tmp_x = t(img[,,4]);
-    #ex_x[i,] = alg_matrix_to_spiral(xv, tmp_x, 1, 16, 1, 16);
+  for (i in seq(1, ex_alp_len)) {
+    fname = sprintf("img16x16/%s.png", ex_alp[i]);
+    img = readPNG(fname);
     ex_x[i,] = as.vector(t(img[,,4]));
+    # tmp_x = t(img[,,4]);
+    # ex_x[i,] = alg_matrix_to_spiral(xv, tmp_x, 1, 16, 1, 16);
   }
-
-  ex_d[1,1] = 1; ex_d[1,2] = 0; ex_d[1,3] = 0; # A
-  ex_d[2,1] = 0; ex_d[2,2] = 1; ex_d[2,3] = 0; # B
-  ex_d[3,1] = 0; ex_d[3,2] = 0; ex_d[3,3] = 1; # C
 
   return (list(ex_x, ex_d));
 }
 
-ex_data_for_test = function(i)
+ex_data_for_test = function(i, k = 0)
 {
   library(png);
 
   xv = rep(0, 256);
 
-  id = c("img16x16/A0.png", "img16x16/B0.png", "img16x16/C0.png", "img16x16/D0.png",
-         "img16x16/E0.png");
+  fname = sprintf("img16x16/%s%d.png", ex_alp[i], k);
 
-  img = readPNG(id[i]);
-    #tmp_x = t(img[,,4]);
-    #ex_x[i,] = alg_matrix_to_spiral(xv, tmp_x, 1, 16, 1, 16);
+  img = readPNG(fname);
+  # tmp_x = t(img[,,4]);
+  # ex_x[i,] = alg_matrix_to_spiral(xv, tmp_x, 1, 16, 1, 16);
   xv = as.vector(t(img[,,4]))
 
-  cat("read file", id[i], "\n");
+  cat("read file", fname, "\n");
 
   return (xv);
 }
