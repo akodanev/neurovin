@@ -57,6 +57,7 @@ ex_data_for_test = function(i, k = 0)
   xv = rep(0, 256);
 
   fname = sprintf("img16x16/%s%d.png", ex_alp[i], k);
+  #fname = sprintf("img16x16/%s.png", ex_alp[i]);
 
   img = readPNG(fname);
   # tmp_x = t(img[,,4]);

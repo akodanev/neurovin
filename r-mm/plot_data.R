@@ -14,8 +14,14 @@ plot_functions = function()
 
   x = seq(-10, 10, 0.5);
 
-  y = act_sigmoid_deriv_fn(x, 0.8);
+  y = act_sigmoid_fn(x, 0.8);
   plot_xy(x, min(x), max(x), "x", y, min(y), max(y), "y");
+}
+
+plot_y = function(y, str)
+{
+  x = seq(1, length(y));
+  plot_xy(x, 1, max(x), "steps", y, min(y), max(y), str);
 }
 
 plot_xy = function(x, min_x, max_x, x_str, y, min_y, max_y, y_str)
@@ -41,10 +47,7 @@ plot_xy = function(x, min_x, max_x, x_str, y, min_y, max_y, y_str)
   plot(x, seq(min_y, max_y, step), type ='n', ylab=y_str);
   grid(lwd = 1, col = col_grid);
 
-  #-------------------------------------------------
-  points(x, y, type="p", col = col_1);
-  # points(v_t_faults,v_mean, type="p",col="#00FF00", pch = 10);
-
+  points(x, y, type="b", pch = 21, bg = col_2, cex = 1.2);
   par(op);#- reset to default
 }
 

@@ -28,7 +28,7 @@ single_net_learn = function(b, w, y, d, x, n_cnt)
   # Learning...
 
   # learning rate 0.1..0.9
-  lr = 1;
+  lr = 2;
 
   # delta rule, h is the weighted sum of the neuron's inputs
   # h = rep(0, n_cnt);
@@ -38,8 +38,10 @@ single_net_learn = function(b, w, y, d, x, n_cnt)
   for (i in seq(1, n_cnt)) {
     w[2,i,] = w[2,i,] + n_err[i] * x;
   }
-
-  return (w);
+  
+  # b = b + n_err;
+  
+  return (list(w, b));
 }
 
 single_net = function()
@@ -55,7 +57,7 @@ single_net = function()
 
   fn_k = 1;
 
-  b = seq(0, n_cnt);
+  b = seq(1, n_cnt);
   # desired output, for learning
   d = rep(0, n_cnt);
 
@@ -65,21 +67,31 @@ single_net = function()
   # initialize weights
   w = array(0, dim = c(w_mem_step, n_cnt, i_cnt));
 
+  for (i in seq(1, n_cnt)) {
+    w[2,i,] = runif(i_cnt, 0, 0.5);
+  }
+  
   # run auto training
   i = 0;
-  while (i < 20) {
+  total_error = 0;
+  while (i < 120) {
 
     id = (i %% n_cnt) + 1;
     x = ex_x[id,];
     d = ex_d[id,];
 
     y = single_net_calc(b, w, x, n_cnt, fn_k);
-    w = single_net_learn(b, w, y, d, x, n_cnt);
-
+    ret = single_net_learn(b, w, y, d, x, n_cnt);
+    w = ret[[1]]; b = ret[[2]];
+    
+    total_error = c(total_error, abs(d - y) %*% rep(1, length(y)));        
+    
     i = i + 1;
   }
+  
+  plot_y(total_error, "total_error");
 
-  plot_weights(w[2,,]);
+  #plot_weights(w[2,,]);
 
   # test run
   for (i in seq(1, 6)) {
