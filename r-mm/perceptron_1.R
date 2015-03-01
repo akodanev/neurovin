@@ -3,11 +3,13 @@
 #
 # Single-layer artificial neural network with learning
 # ====================================================
+rm(list=ls());
 
 source("activation_fn.R");
 source("plot_data.R");
 
-source("ex_data_img16x16.R");
+#source("ex_data_img16x16.R");
+source("ex_data_img5x7.R");
 
 single_net_calc = function(b, w, x, n_cnt, k)
 {
