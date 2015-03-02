@@ -9,7 +9,7 @@
 ex_alp = c('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
            'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z');
 
-ex_alp_len = 6; # length(ex_alp);
+ex_alp_len = 16; # length(ex_alp);
 
 ex_analyze_results = function(y)
 {
@@ -42,7 +42,7 @@ ex_data_for_learn = function()
   for (i in seq(1, ex_alp_len)) {
     fname = sprintf("img5x7/%s.png", ex_alp[i]);
     img = readPNG(fname);
-    ex_x[i,] = as.vector(t(img[,,3]));
+    ex_x[i,] = as.vector(t(img[,,4]));
     # tmp_x = t(img[,,4]);
     # ex_x[i,] = alg_matrix_to_spiral(xv, tmp_x, 1, 16, 1, 16);
   }
@@ -62,7 +62,7 @@ ex_data_for_test = function(i, k = 0)
   img = readPNG(fname);
   # tmp_x = t(img[,,4]);
   # ex_x[i,] = alg_matrix_to_spiral(xv, tmp_x, 1, 16, 1, 16);
-  xv = as.vector(t(img[,,3]))
+  xv = as.vector(t(img[,,4]))
 
   cat("read file", fname, "\n");
 
