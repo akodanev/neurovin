@@ -110,7 +110,7 @@ multi_net = function()
   i_cnt = length(ex_x[1,]);
 
   # hidden layer, 40% of inputs count
-  h_cnt = round(i_cnt * 0.8);
+  h_cnt = round(i_cnt * 0.3);
   cat("hidden layer contains", h_cnt, "neurons\n");
 
   # neurons in the output layer
@@ -126,7 +126,7 @@ multi_net = function()
   hy = rep(0, h_cnt);
   
   # output layer
-  w = multi_net_init_weights(n_cnt, h_cnt, 1);  
+  w = multi_net_init_weights(n_cnt, h_cnt, 0.7);  
   b = multi_net_init_bias(n_cnt, 1);
   s = rep(0, n_cnt);
   y = rep(0, n_cnt);
@@ -139,7 +139,7 @@ multi_net = function()
   sum_error = c(0,0);
   tr_start = 0; tr_end = 0;
   
-  while (i < 5000) {
+  while (i < 2000) {
 
     id = (i %% n_cnt) + 1;
         
@@ -165,25 +165,27 @@ multi_net = function()
       
       if (tr_start != 0) {
         sum_error = c(sum_error, tr_error %*% rep(1, length(tr_error)));
+        avg_error = c(avg_error, sum_error[length(sum_error)] / length(tr_error));
       } else {
         sum_error = c(tr_error %*% rep(1, length(tr_error)));
+        avg_error = sum_error[length(sum_error)] / length(tr_error);
       }
-      
+
       tr_start = tr_end;
-    }    
-    
-    if ((i > n_cnt) && (sum_error[length(sum_error)] < 1)) {
-      break;
+
+      if ((i > n_cnt) && (avg_error[length(avg_error)] <= 0.5)) {
+        break;
+      }
     }
-    
+
     i = i + 1;
   }
-  
-  plot_y(sum_error, "sum_error");
+
+  plot_y(avg_error, "avg_error");
   #plot_weights(wh);
 
   # test run
-  for (i in seq(1, 16)) {
+  for (i in seq(1, ex_alp_len)) {
 
     cat("\nTest #", i, ": ");
 
