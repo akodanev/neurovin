@@ -36,29 +36,44 @@ multi_net_learn = function(x, i_cnt, hs, wh, bh, hy, h_cnt, s, w, b, y, t, n_cnt
   lr = 0.1;
   w0 = w;
   a = 0.0001;
+
   err = (t - y) * act_sigmoid_deriv_y_fn(y, k);
-  for (i in seq(1, n_cnt)) {
-    w[2,i,] = w[2,i,] + a * w[1,i,] + lr * err[i] * hy;    
-  }
-  b[2,] = b[2,] + a * b[1,] + lr * err;
-  
-  w[1,,] = w[2,,];
-  b[1,] = b[2,];
+
+  bi = which.min(err);
+
+  w[2,bi,] = w[2,bi,] + a * w[1,bi,] + lr * err[bi] * hy;
+
+  b[2,bi] = b[2,bi] + a * b[1,bi] + lr * err[bi];
+
+  w[1,bi,] = w[2,bi,];
+  b[1,bi] = b[2,bi];
   # update weights in the hidden layer
-  
+
   err_h = rep(0, h_cnt);
   for (i in seq(1, h_cnt)) {
     err_h[i] = act_sigmoid_deriv_y_fn(hy[i], k) * (err %*% w0[2,,i]);
   }
-  
-  for (i in seq(1, h_cnt)) {
-    wh[2,i,] = wh[2,i,] + a * wh[1,i,] + lr * err_h[i] * x;      
+
+  bi_h = which.min(err_h);
+
+  if (all(bi_h == 1)) {
+    idx = c(bi_h, h_cnt, 2);
+  } else if (all(bi_h == h_cnt)) {
+    idx = c(bi_h, 1, h_cnt - 1);
+  } else {
+    idx = c(bi_h, bi_h - 1, bi_h + 1);
   }
-  bh[2,] = bh[2,] + a * bh[1,] + lr * err_h;
-    
-  wh[1,,] = wh[2,,];
-  bh[1,] = bh[2,];
-  
+
+  f = c(1, 0.3, 0.3);
+
+  for (i in seq(1, 3)) {
+    id = idx[i];
+    wh[2,id,] = wh[2,id,] + a * wh[1,id,] + f[i] * lr * err_h[id] * x;
+    bh[2,id] = bh[2,id] + a * bh[1,id] + f[i] * lr * err_h[id];
+    wh[1,id,] = wh[2,id,];
+    bh[1,id] = bh[2,id];
+  }
+
   return(list(wh, bh, w, b));
 }
 

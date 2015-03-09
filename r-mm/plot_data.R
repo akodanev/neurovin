@@ -7,9 +7,10 @@ plot_set_parameters = function(cnt,n)
   plot_count = cnt;
   #bottom, left, top, right
   op<-par(mfrow=c(plot_count,n), mar=c(2,5,1,1), xaxs='i',lab=c(12, 5, 7));  
+  return (op);
 }
 
-plot_cleanup = function()
+plot_cleanup = function(op)
 {
   par(op); # - reset to default
 }
