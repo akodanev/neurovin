@@ -35,7 +35,7 @@ multi_net_learn = function(x, i_cnt, hs, wh, bh, hy, h_cnt, s, w, b, y, t, n_cnt
   # update weights in the output layer
   lr = 0.1;
   w0 = w;
-  a = 0.001;
+  a = 0.0001;
   err = (t - y) * act_sigmoid_deriv_y_fn(y, k);
   for (i in seq(1, n_cnt)) {
     w[2,i,] = w[2,i,] + a * w[1,i,] + lr * err[i] * hy;    
@@ -139,7 +139,7 @@ multi_net = function()
   sum_error = c(0,0);
   tr_start = 0; tr_end = 0;
   
-  while (i < 2000) {
+  while (i < 30000) {
 
     id = (i %% n_cnt) + 1;
         
@@ -173,17 +173,27 @@ multi_net = function()
 
       tr_start = tr_end;
 
-      if ((i > n_cnt) && (avg_error[length(avg_error)] <= 0.5)) {
+      if ((i > n_cnt) && (avg_error[length(avg_error)] <= 0.25)) {
         break;
       }
     }
 
     i = i + 1;
   }
-
+  
+  # remove first big numbers
+  avg_error = avg_error[30:length(avg_error)];
+  
+  # Plot data
+  plot_set_parameters(2,2);
+  
   plot_y(avg_error, "avg_error");
-  #plot_weights(wh);
+  plot_weights(wh, "hidden neuron's weights");
+  plot_weights(w, "output neuron's weights");
+  
+  plot_cleanup();
 
+  
   # test run
   for (i in seq(1, ex_alp_len)) {
 

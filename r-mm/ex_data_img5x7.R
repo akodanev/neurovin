@@ -9,7 +9,7 @@
 ex_alp = c('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
            'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z');
 
-ex_alp_len = length(ex_alp);
+ex_alp_len = 26; #length(ex_alp);
 
 ex_analyze_results = function(y)
 {
@@ -17,7 +17,7 @@ ex_analyze_results = function(y)
   uncertanty = -1;
 
   for (i in seq(1, length(y))) {
-    if (y[i] >= 0.9) {
+    if (y[i] >= 0.6) {
       id = i;
       uncertanty = uncertanty + 1;
     }

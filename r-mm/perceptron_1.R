@@ -91,12 +91,17 @@ single_net = function()
     i = i + 1;
   }
   
+  # Plot data
+  plot_set_parameters(2,1);
+  
   plot_y(total_error, "total_error");
+  plot_weights(w, "neuron's weights");  
+  plot_cleanup();  
 
   #plot_weights(w[2,,]);
 
   # test run
-  for (i in seq(1, 6)) {
+  for (i in seq(1, ex_alp_len)) {
 
     cat("\nTest #", i, ": ");
 
