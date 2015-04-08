@@ -43,6 +43,7 @@ pos = function(x)
 
   return (0);
 }
+
 # 3. Threshold function, y is 0 or 1
 act_threshold_fn = function(x, k = 1)
 {
